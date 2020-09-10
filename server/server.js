@@ -1,6 +1,7 @@
 import express from 'express';
 import mongoose from 'mongoose';
-import Messages from './dbMessages.js';
+import Messages from './db/models/messages.model.js';
+import Rooms from './db/models/rooms.model.js';
 import Pusher from 'pusher';
 import cors from 'cors';
 import dotenv from 'dotenv';
@@ -36,10 +37,12 @@ const db = mongoose.connection;
 db.once('open', () => {
   console.log('Database connected');
 
-  const msgCollection = db.collection('messagecontents');
-  const changeStream = msgCollection.watch();
+  const msgCollection = db.collection('messages');
+  const rmsCollection = db.collection('rooms');
+  const changeStreamMessages = msgCollection.watch();
+  const changeStreamRooms = rmsCollection.watch();
 
-  changeStream.on('change', (change) => {
+  changeStreamMessages.on('change', (change) => {
     console.log(change);
     if (change.operationType === 'insert') {
       const messageDetails = change.fullDocument;
@@ -47,7 +50,19 @@ db.once('open', () => {
         name: messageDetails.name,
         message: messageDetails.message,
         timestamp: messageDetails.timestamp,
-        received: messageDetails.received,
+        room_id: messageDetails.room_id,
+      });
+    } else {
+      console.log('Error triggering Pusher');
+    }
+  });
+
+  changeStreamRooms.on('change', (change) => {
+    console.log(change);
+    if (change.operationType === 'insert') {
+      const roomDetails = change.fullDocument;
+      pusher.trigger('rooms', 'inserted', {
+        name: roomDetails.name,
       });
     } else {
       console.log('Error triggering Pusher');
@@ -58,6 +73,7 @@ db.once('open', () => {
 // routes
 app.get('/', (req, res) => res.status(200).send('hello world'));
 
+// fetch all messages
 app.get('/api/v1/messages/sync', (req, res) => {
   Messages.find((err, data) => {
     if (err) {
@@ -68,6 +84,7 @@ app.get('/api/v1/messages/sync', (req, res) => {
   });
 });
 
+// create message
 app.post('/api/v1/messages/new', (req, res) => {
   const dbMessage = req.body;
 
@@ -76,6 +93,47 @@ app.post('/api/v1/messages/new', (req, res) => {
       res.status(500).send(err);
     } else {
       res.status(201).send(data);
+    }
+  });
+});
+
+// fetch all chat room
+app.get('/api/v1/rooms/sync', (req, res) => {
+  Rooms.find((err, data) => {
+    if (err) {
+      res.status(500).send(err);
+    } else {
+      res.status(200).send(data);
+    }
+  });
+});
+
+// create chat room
+app.post('/api/v1/rooms/new', (req, res) => {
+  const dbMessage = req.body;
+
+  Rooms.create(dbMessage, (err, data) => {
+    if (err) {
+      res.status(500).send(err);
+    } else {
+      res.status(201).send(data);
+    }
+  });
+});
+
+// get room by id
+app.get('/api/v1/rooms/:roomId', (req, res) => {
+  Rooms.findById(req.params.roomId, (err, room) => {
+    if (err) {
+      res.status(500).send(err);
+    } else {
+      Messages.find({ room_id: req.params.roomId }, (error, messages) => {
+        if (error) {
+          res.status(500).send(error);
+        } else {
+          res.status(200).send({ room: room, messages: messages });
+        }
+      });
     }
   });
 });
