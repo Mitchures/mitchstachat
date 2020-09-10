@@ -47,7 +47,7 @@ db.once('open', () => {
     if (change.operationType === 'insert') {
       const messageDetails = change.fullDocument;
       pusher.trigger('messages', 'inserted', {
-        name: messageDetails.name,
+        user: messageDetails.user,
         message: messageDetails.message,
         timestamp: messageDetails.timestamp,
         room_id: messageDetails.room_id,
@@ -62,6 +62,7 @@ db.once('open', () => {
     if (change.operationType === 'insert') {
       const roomDetails = change.fullDocument;
       pusher.trigger('rooms', 'inserted', {
+        _id: roomDetails._id,
         name: roomDetails.name,
       });
     } else {
@@ -127,13 +128,7 @@ app.get('/api/v1/rooms/:roomId', (req, res) => {
     if (err) {
       res.status(500).send(err);
     } else {
-      Messages.find({ room_id: req.params.roomId }, (error, messages) => {
-        if (error) {
-          res.status(500).send(error);
-        } else {
-          res.status(200).send({ room: room, messages: messages });
-        }
-      });
+      res.status(200).send(room);
     }
   });
 });

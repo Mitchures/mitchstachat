@@ -1,6 +1,12 @@
+export interface User {
+  uid: string;
+  name: string;
+  photoURL: string;
+}
+
 export interface Message {
   _id: string;
-  name: string;
+  user: User;
   message: string;
   timestamp: string;
   room_id: string;

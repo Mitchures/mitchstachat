@@ -29,7 +29,7 @@ const Chat: React.FC<Props> = ({ messages }) => {
     if (roomId) {
       axios.get(`/api/v1/rooms/${roomId}`).then((response) => {
         console.log(response);
-        setRoomName(response.data.room.name);
+        setRoomName(response.data.name);
       });
     }
   }, [roomId]);
@@ -43,7 +43,7 @@ const Chat: React.FC<Props> = ({ messages }) => {
 
     await axios
       .post('/api/v1/messages/new', {
-        name: user?.name,
+        user: user,
         message: input,
         timestamp: new Date().toUTCString(),
         room_id: roomId,
@@ -69,7 +69,10 @@ const Chat: React.FC<Props> = ({ messages }) => {
 
           <div className="chat__headerInfo">
             <h3>{roomName}</h3>
-            <p>Last seen at...</p>
+            <p>
+              Last seen{' '}
+              {moment(messages[messages.length - 1]?.timestamp).fromNow()}
+            </p>
           </div>
 
           <div className="chat__headerRight">
@@ -93,10 +96,10 @@ const Chat: React.FC<Props> = ({ messages }) => {
               <p
                 key={`${message._id}__${index}`}
                 className={`chat__message ${
-                  message.name === user?.name && 'chat__receiver'
+                  message.user.uid === user?.uid && 'chat__receiver'
                 }`}
               >
-                <span className="chat__name">{message.name}</span>
+                <span className="chat__name">{message.user.name}</span>
                 {message.message}
                 <span className="chat__timestamp">
                   {moment(message.timestamp).fromNow()}

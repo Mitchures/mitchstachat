@@ -2,13 +2,9 @@ import React from 'react';
 import './SidebarChat.css';
 import { Avatar } from '@material-ui/core';
 import { Link } from 'react-router-dom';
+import { Room } from 'types';
 
-interface Props {
-  _id: string;
-  name: string;
-}
-
-const SidebarChat: React.FC<Props> = ({ name, _id }) => {
+const SidebarChat: React.FC<Room> = ({ name, _id }) => {
   return (
     <Link to={`/rooms/${_id}`}>
       <div className="sidebarChat">

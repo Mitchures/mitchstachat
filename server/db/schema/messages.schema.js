@@ -2,7 +2,11 @@ import mongoose from 'mongoose';
 
 const messagesSchema = mongoose.Schema({
   message: String,
-  name: String,
+  user: {
+    uid: String,
+    name: String,
+    photoURL: String,
+  },
   timestamp: String,
   room_id: String,
 });
