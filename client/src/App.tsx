@@ -1,37 +1,13 @@
-import React, { useEffect, useState } from 'react';
+import React from 'react';
 import './App.css';
 import Sidebar from 'components/Sidebar';
 import Chat from 'components/Chat';
-import pusher, { Channel } from 'config/pusher';
-import axios from 'config/axios';
-import { Message } from 'types';
 import { BrowserRouter as Router, Switch, Route } from 'react-router-dom';
 import Login from 'Login';
 import { useStateValue } from 'context';
 
 const App: React.FC = () => {
   const [{ user }] = useStateValue();
-  const [messages, setMessages] = useState<Message[]>([]);
-
-  useEffect(() => {
-    axios.get('/api/v1/messages/sync').then((response) => {
-      console.log(response);
-      setMessages(response.data);
-    });
-  }, []);
-
-  useEffect(() => {
-    const channel: Channel = pusher.subscribe('messages');
-    channel.bind('inserted', (newMessage: Message) => {
-      console.log(newMessage);
-      setMessages([...messages, newMessage]);
-    });
-
-    return () => {
-      channel.unbind_all();
-      channel.unsubscribe();
-    };
-  }, [messages]);
 
   return (
     <div className="app">
@@ -43,7 +19,7 @@ const App: React.FC = () => {
             <Sidebar />
             <Switch>
               <Route path="/rooms/:roomId">
-                <Chat messages={messages} />
+                <Chat />
               </Route>
               <Route path="/">
                 <h1>Welcome to Mitchstachat!</h1>

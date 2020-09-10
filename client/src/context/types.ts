@@ -1,7 +1,7 @@
 interface UserState {
-  uid: string | null | undefined;
-  name: string | null | undefined;
-  photoURL: string | null | undefined;
+  uid?: string | null;
+  name?: string | null;
+  photoURL?: string | null;
 }
 
 export type State = {

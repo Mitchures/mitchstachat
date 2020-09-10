@@ -13,29 +13,38 @@ import axios from 'config/axios';
 import moment from 'moment';
 import { useParams } from 'react-router-dom';
 import { useStateValue } from 'context';
+import pusher, { Channel } from 'config/pusher';
 
-interface Props {
-  messages: Message[];
-}
-
-const Chat: React.FC<Props> = ({ messages }) => {
+const Chat: React.FC = () => {
   const [input, setInput] = useState<string>('');
   const [roomName, setRoomName] = useState<string>('');
   const messagesEndRef: any = useRef(null);
   const { roomId } = useParams();
   const [{ user }] = useStateValue();
+  const [messages, setMessages] = useState<Message[]>([]);
 
   useEffect(() => {
     if (roomId) {
       axios.get(`/api/v1/rooms/${roomId}`).then((response) => {
         console.log(response);
-        setRoomName(response.data.name);
+        setRoomName(response.data.room.name);
+        setMessages(response.data.messages);
       });
     }
   }, [roomId]);
 
   useEffect(() => {
+    const channel: Channel = pusher.subscribe('messages');
+    channel.bind('inserted', (newMessage: Message) => {
+      console.log(newMessage);
+      setMessages([...messages, newMessage]);
+    });
     messagesEndRef.current.scrollIntoView({ behavior: 'smooth' });
+
+    return () => {
+      channel.unbind_all();
+      channel.unsubscribe();
+    };
   }, [messages]);
 
   const sendMessage = async (e: React.MouseEvent<HTMLButtonElement>) => {
@@ -70,8 +79,11 @@ const Chat: React.FC<Props> = ({ messages }) => {
           <div className="chat__headerInfo">
             <h3>{roomName}</h3>
             <p>
-              Last seen{' '}
-              {moment(messages[messages.length - 1]?.timestamp).fromNow()}
+              {messages[messages.length - 1]
+                ? `Last activity ${moment(
+                    messages[messages.length - 1]?.timestamp,
+                  ).fromNow()}`
+                : ''}
             </p>
           </div>
 
@@ -90,23 +102,20 @@ const Chat: React.FC<Props> = ({ messages }) => {
       </div>
 
       <div className="chat__body">
-        {messages.map(
-          (message, index) =>
-            message.room_id === roomId && (
-              <p
-                key={`${message._id}__${index}`}
-                className={`chat__message ${
-                  message.user.uid === user?.uid && 'chat__receiver'
-                }`}
-              >
-                <span className="chat__name">{message.user.name}</span>
-                {message.message}
-                <span className="chat__timestamp">
-                  {moment(message.timestamp).fromNow()}
-                </span>
-              </p>
-            ),
-        )}
+        {messages.map((message, index) => (
+          <p
+            key={`${message._id}__${index}`}
+            className={`chat__message ${
+              message.user.uid === user?.uid && 'chat__receiver'
+            }`}
+          >
+            <span className="chat__name">{message.user.name}</span>
+            {message.message}
+            <span className="chat__timestamp">
+              {moment(message.timestamp).fromNow()}
+            </span>
+          </p>
+        ))}
         <div ref={messagesEndRef}></div>
       </div>
 

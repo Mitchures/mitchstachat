@@ -74,17 +74,6 @@ db.once('open', () => {
 // routes
 app.get('/', (req, res) => res.status(200).send('hello world'));
 
-// fetch all messages
-app.get('/api/v1/messages/sync', (req, res) => {
-  Messages.find((err, data) => {
-    if (err) {
-      res.status(500).send(err);
-    } else {
-      res.status(200).send(data);
-    }
-  });
-});
-
 // create message
 app.post('/api/v1/messages/new', (req, res) => {
   const dbMessage = req.body;
@@ -122,13 +111,19 @@ app.post('/api/v1/rooms/new', (req, res) => {
   });
 });
 
-// get room by id
+// get room by id and its messages
 app.get('/api/v1/rooms/:roomId', (req, res) => {
   Rooms.findById(req.params.roomId, (err, room) => {
     if (err) {
       res.status(500).send(err);
     } else {
-      res.status(200).send(room);
+      Messages.find({ room_id: req.params.roomId }, (error, messages) => {
+        if (error) {
+          res.status(500).send(error);
+        } else {
+          res.status(200).send({ room: room, messages: messages });
+        }
+      });
     }
   });
 });
