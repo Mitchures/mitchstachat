@@ -58,3 +58,7 @@
   overflow: scroll;
   margin: 0.625rem 0;
 }
+
+.sidebar__chats > a {
+  text-decoration: none;
+}

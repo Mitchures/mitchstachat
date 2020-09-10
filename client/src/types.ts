@@ -3,5 +3,10 @@ export interface Message {
   name: string;
   message: string;
   timestamp: string;
-  received: boolean;
+  room_id: string;
+}
+
+export interface Room {
+  _id: string;
+  name: string;
 }

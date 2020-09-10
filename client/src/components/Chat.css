@@ -21,7 +21,7 @@
 .chat__headerContent {
   display: flex;
   align-items: center;
-  padding: 0 1.25rem;
+  padding: 0 1.25rem 0 1.875rem;
 }
 
 .chat__headerInfo {
@@ -87,6 +87,7 @@
   top: -20px;
   font-weight: 800;
   font-size: small;
+  white-space: nowrap;
 }
 
 .chat__footer {
