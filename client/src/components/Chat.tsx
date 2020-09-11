@@ -45,7 +45,7 @@ const Chat: React.FC = () => {
     };
   }, [messages]);
 
-  const sendMessage = async (e: React.MouseEvent<HTMLButtonElement>) => {
+  const sendMessage = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
 
     await axios
@@ -121,16 +121,14 @@ const Chat: React.FC = () => {
         <IconButton>
           <InsertEmoticon />
         </IconButton>
-        <form>
+        <form onSubmit={sendMessage}>
           <input
             value={input}
             onChange={handleChange}
             type="text"
             placeholder="Type a message"
           />
-          <button type="submit" onClick={sendMessage}>
-            Send Message
-          </button>
+          <button type="submit">Send Message</button>
         </form>
         <IconButton>
           <Mic />
