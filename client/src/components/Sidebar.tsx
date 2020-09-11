@@ -14,7 +14,6 @@ const Sidebar: React.FC = () => {
 
   useEffect(() => {
     axios.get('/api/v1/rooms/sync').then((response) => {
-      console.log(response);
       setRooms(response.data);
     });
   }, []);
@@ -22,7 +21,6 @@ const Sidebar: React.FC = () => {
   useEffect(() => {
     const channel: Channel = pusher.subscribe('rooms');
     channel.bind('inserted', (newRoom: Room) => {
-      console.log(newRoom);
       setRooms([...rooms, newRoom]);
     });
 

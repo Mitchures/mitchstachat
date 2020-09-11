@@ -10,7 +10,6 @@ const Login: React.FC = () => {
     auth
       .signInWithPopup(provider)
       .then(({ user }) => {
-        console.log(user);
         dispatch({
           type: 'set_user',
           user: {

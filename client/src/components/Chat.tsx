@@ -26,7 +26,6 @@ const Chat: React.FC = () => {
   useEffect(() => {
     if (roomId) {
       axios.get(`/api/v1/rooms/${roomId}`).then((response) => {
-        console.log(response);
         setRoomName(response.data.room.name);
         setMessages(response.data.messages);
       });
@@ -36,7 +35,6 @@ const Chat: React.FC = () => {
   useEffect(() => {
     const channel: Channel = pusher.subscribe('messages');
     channel.bind('inserted', (newMessage: Message) => {
-      console.log(newMessage);
       setMessages([...messages, newMessage]);
     });
     messagesEndRef.current.scrollIntoView({ behavior: 'smooth' });

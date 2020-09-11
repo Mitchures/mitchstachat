@@ -22,7 +22,9 @@ const App: React.FC = () => {
                 <Chat />
               </Route>
               <Route path="/">
-                <h1>Welcome to Mitchstachat!</h1>
+                <div className="app__welcome">
+                  <h1>Welcome to Mitchstachat!</h1>
+                </div>
               </Route>
             </Switch>
           </Router>
